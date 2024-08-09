@@ -12,6 +12,12 @@ Uint32 triggerFall(Uint32 interval, void *param) {
     SDL_PushEvent(&event);
     return interval;
 }
+
+void initGame(SDL_Renderer *renderer, int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+    memset(board, EMPTY, sizeof(int) * ROWS * COLUMNS);
+    spawnTetrimino(tetrimino, board);
+    draw_board(renderer, board);
+}
     
 
 int main(void) {
@@ -37,10 +43,9 @@ int main(void) {
         return (1);
     }
 
-    int gameLoop = 1;
     int board[ROWS][COLUMNS];
     Tetrimino currentTetrimino;
-    init_board(board, &currentTetrimino);
+    initGame(renderer, board, &currentTetrimino);
 
     SDL_Event e;
     Uint32 fallEvent = SDL_RegisterEvents(1);
@@ -49,6 +54,7 @@ int main(void) {
         SDL_AddTimer(1000, triggerFall, &fallEvent);
     }
 
+    int gameLoop = 1;
     while (gameLoop) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) gameLoop = 0;
@@ -66,6 +72,12 @@ int main(void) {
                         break;
                     case SDLK_UP:
                         rotateTetrimino(board, &currentTetrimino);
+                        break;
+                    case SDLK_r:
+                        initGame(renderer, board, &currentTetrimino);
+                        break;
+                    case SDLK_q:
+                        gameLoop = 0;
                         break;
                 }
             }

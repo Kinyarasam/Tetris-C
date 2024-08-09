@@ -49,7 +49,6 @@ void clearLines(int board[ROWS][COLUMNS]) {
     }
 }
 
-
 void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
     clearLines(board);
     int shapeType = rand() % NUMBER_OF_SHAPES;
@@ -78,10 +77,12 @@ void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
     }
     tetrimino->row = 0;
     tetrimino->col = (COLUMNS / 2) - (TETRIMINO_SIZE / 2);
-    if (checkCollision(board, tetrimino->row, tetrimino->col, tetrimino)) {
+    printf("%d\n", checkCollision(board, tetrimino->row, tetrimino->col, tetrimino));
+    if (!checkCollision(board, tetrimino->row, tetrimino->col, tetrimino)) {
         update_board(board, tetrimino, FILLED);
     } else {
-        // 
+        printf("gameOver");
+        gameOver(board, tetrimino);
     }
 }
 
@@ -107,7 +108,6 @@ void moveTetrimino(int board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino
 void rotateClockwise(int shape[TETRIMINO_SIZE][TETRIMINO_SIZE]) {
     int temp[TETRIMINO_SIZE][TETRIMINO_SIZE];
 
-    // Copy the original matrix to a temporary matrix
     for (int i = 0; i < TETRIMINO_SIZE; i++) {
         for (int j = 0; j < TETRIMINO_SIZE; j++) {
             temp[i][j] = shape[i][j];
@@ -140,3 +140,9 @@ void rotateTetrimino(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
 void initTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
     spawnTetrimino(tetrimino, board);
 }
+
+
+// void initGame(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+//     init_board(board, tetrimino);
+//     initTetrimino(tetrimino, board);
+// }

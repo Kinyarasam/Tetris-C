@@ -1,5 +1,30 @@
 #include "tetris.h"
 
+void gameOver(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+    printf("Game Over! Press R to restart or Q to quit.\n");
+
+    memset(board, EMPTY, sizeof(int) * ROWS * COLUMNS);
+
+    bool waitingForInput = true;
+    SDL_Event e;
+    while (waitingForInput) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_r:
+                        memset(board, EMPTY, sizeof(int) * ROWS * COLUMNS);
+                        spawnTetrimino(tetrimino, board);
+                        waitingForInput = false;
+                        break;
+                    case SDLK_q:
+                        SDL_Quit();
+                        exit(0);
+                }
+            }
+        }
+    }
+}
+
 void init_board(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLUMNS; j++) {

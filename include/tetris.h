@@ -20,5 +20,6 @@ typedef struct {
 void initTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]);
 void moveTetrimino(int board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino);
 void rotateTetrimino(int board[ROWS][COLUMNS], Tetrimino *tetrimino);
+void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]);
 
 #endif /** __TETRIS_H__ */
