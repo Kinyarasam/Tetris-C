@@ -3,8 +3,7 @@
 #include "shapes.h"
 #include <stdbool.h>
 
-
-bool checkCollision(int board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino *tetrimino) {
+bool checkCollision(Cell board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino *tetrimino) {
     for (int i = 0; i < TETRIMINO_SIZE; i++) {
         for (int j = 0; j < TETRIMINO_SIZE; j++) {
             if (tetrimino->shape[i][j] == 1) {
@@ -13,14 +12,11 @@ bool checkCollision(int board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino 
 
                 printf("Checking position [%d, %d] on board\n", targetRow, targetCol);
 
-                // Check if the new position is out of the board's bounds
                 if (targetRow >= ROWS || targetRow < 0 || targetCol >= COLUMNS || targetCol < 0) {
-                    // printf("Collision with boundary at [%d, %d]\n", targetRow, targetCol);
                     return true;
                 }
 
-                if (board[targetRow][targetCol] == FILLED) {
-                    // printf("Collision with filled cell at [%d, %d]\n", targetRow, targetCol);
+                if (board[targetRow][targetCol].filled == FILLED) {
                     return true;
                 }
             }
@@ -30,26 +26,26 @@ bool checkCollision(int board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino 
 }
 
 
-void clearLines(int board[ROWS][COLUMNS]) {
+void clearLines(Cell board[ROWS][COLUMNS]) {
     for (int i = ROWS - 1; i >= 0; i--) {
         bool lineisFull = true;
         for (int j = 0; j < COLUMNS; j++) {
-            if (board[i][j] == EMPTY) {
+            if (board[i][j].filled == EMPTY) {
                 lineisFull = false;
                 break;
             }
         }
         if (lineisFull) {
             for (int k = i; k > 0; k--) {
-                memcpy(board[k], board[k - 1], sizeof(board[0]));  // Copy each row down
+                memcpy(board[k], board[k - 1], sizeof(board[0]));
             }
-            memset(board[0], EMPTY, sizeof(board[0]));  // Clear the top row
-            i++;  // Decrement i to recheck the new line that has moved down
+            memset(board[0], EMPTY, sizeof(board[0]));
+            i++;
         }
     }
 }
 
-void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
+void spawnTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]) {
     clearLines(board);
     int shapeType = rand() % NUMBER_OF_SHAPES;
     switch (shapeType) {
@@ -75,6 +71,7 @@ void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
             memcpy(tetrimino->shape, tetriminoL, sizeof(tetriminoL));
             break;
     }
+    tetrimino->color = colors[shapeType];
     tetrimino->row = 0;
     tetrimino->col = (COLUMNS / 2) - (TETRIMINO_SIZE / 2);
     printf("%d\n", checkCollision(board, tetrimino->row, tetrimino->col, tetrimino));
@@ -86,7 +83,7 @@ void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
     }
 }
 
-void moveTetrimino(int board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino) {
+void moveTetrimino(Cell board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino) {
     int newRow = tetrimino->row + (direction == 0 ? 1 : 0);
     int newCol = tetrimino->col + (direction == -1 ? -1 : (direction == 1 ? 1 : 0));
 
@@ -114,7 +111,6 @@ void rotateClockwise(int shape[TETRIMINO_SIZE][TETRIMINO_SIZE]) {
         }
     }
 
-    // Rotate the matrix clockwise
     for (int i = 0; i < TETRIMINO_SIZE; i++) {
         for (int j = 0; j < TETRIMINO_SIZE; j++) {
             shape[j][TETRIMINO_SIZE - i - 1] = temp[i][j];
@@ -122,7 +118,7 @@ void rotateClockwise(int shape[TETRIMINO_SIZE][TETRIMINO_SIZE]) {
     }
 }
 
-void rotateTetrimino(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+void rotateTetrimino(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
     int originalShape[TETRIMINO_SIZE][TETRIMINO_SIZE];
     memcpy(originalShape, tetrimino->shape, sizeof(tetrimino->shape));
 
@@ -137,12 +133,6 @@ void rotateTetrimino(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
     update_board(board, tetrimino, FILLED);
 }
 
-void initTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]) {
+void initTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]) {
     spawnTetrimino(tetrimino, board);
 }
-
-
-// void initGame(int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
-//     init_board(board, tetrimino);
-//     initTetrimino(tetrimino, board);
-// }

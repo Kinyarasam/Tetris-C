@@ -13,10 +13,10 @@ Uint32 triggerFall(Uint32 interval, void *param) {
     return interval;
 }
 
-void initGame(SDL_Renderer *renderer, int board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+void initGame(SDL_Renderer *renderer, Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
     memset(board, EMPTY, sizeof(int) * ROWS * COLUMNS);
     spawnTetrimino(tetrimino, board);
-    draw_board(renderer, board);
+    draw_board(renderer, board, tetrimino);
 }
     
 
@@ -43,7 +43,6 @@ int main(void) {
         return (1);
     }
 
-    int board[ROWS][COLUMNS];
     Tetrimino currentTetrimino;
     initGame(renderer, board, &currentTetrimino);
 
@@ -85,7 +84,7 @@ int main(void) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        draw_board(renderer, board);
+        draw_board(renderer, board, &currentTetrimino);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }

@@ -15,11 +15,19 @@ typedef struct {
     int shape[TETRIMINO_SIZE][TETRIMINO_SIZE];
     int row;
     int col;
+    SDL_Color color;
 } Tetrimino;
 
-void initTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]);
-void moveTetrimino(int board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino);
-void rotateTetrimino(int board[ROWS][COLUMNS], Tetrimino *tetrimino);
-void spawnTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]);
+typedef struct {
+    int filled;
+    SDL_Color color;
+} Cell;
+
+Cell board[ROWS][COLUMNS];
+
+void initTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]);
+void moveTetrimino(Cell board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino);
+void rotateTetrimino(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino);
+void spawnTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]);
 
 #endif /** __TETRIS_H__ */
