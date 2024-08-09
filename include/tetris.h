@@ -1,31 +1,24 @@
 #ifndef __TETRIS_H__
 #define __TETRIS_H__
 
-#define BOARD_WIDTH 10
-#define BOARD_HEIGHT 10
+#include <SDL2/SDL.h>
+#include <stdbool.h>
+
+#define TETRIMINO_SIZE 4
+#define ROWS 20
+#define COLUMNS 10
+#define CELL_SIZE 30
+#define EMPTY 0
+#define FILLED 1
 
 typedef struct {
-    int x, y;
-} Point;
-
-typedef struct {
-    Point blocks[4];
-    int color;
+    int shape[TETRIMINO_SIZE][TETRIMINO_SIZE];
+    int row;
+    int col;
 } Tetrimino;
 
-typedef struct {
-    int board[BOARD_HEIGHT][BOARD_WIDTH];
-    Tetrimino current_piece;
-    Point current_position;
-    int score;
-} Game;
-
-void init_game(Game *game);
-void draw_board(const Game *game);
-void spawn_piece(Game *game);
-int move_piece(Game *game, int dx, int dy);
-void rotate_piece(Game *game);
-void drop_piece(Game *game);
-void clear_lines(Game *game);
+void initTetrimino(Tetrimino *tetrimino, int board[ROWS][COLUMNS]);
+void moveTetrimino(int board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino);
+void rotateTetrimino(int board[ROWS][COLUMNS], Tetrimino *tetrimino);
 
 #endif /** __TETRIS_H__ */

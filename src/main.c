@@ -1,24 +1,84 @@
 #include <stdio.h>
+#include <SDL2/SDL.h>
+#include "main.h"
+#include "board.h"
 #include "tetris.h"
 
+Uint32 triggerFall(Uint32 interval, void *param) {
+    SDL_Event event;
+    SDL_zero(event);
+    event.type = *((Uint32*)param);
+    event.user.code = 0;
+    SDL_PushEvent(&event);
+    return interval;
+}
+    
+
 int main(void) {
-    Game game;
-    init_game(&game);
-
-    while (1) {
-        draw_board(&game);
-        char command;
-        scanf("%c", &command);
-
-        switch (command) {
-            case 'a': move_piece(&game, -1, 0); break;
-            case 's': move_piece(&game,  0, 1); break;
-            case 'd': move_piece(&game,  1, 0); break;
-            case 'w': rotate_piece(&game); break;
-            case ' ': drop_piece(&game); break;
-            default: break;
-        }
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        fprintf(stderr, "Failed to Initialize SDL: %s\n", SDL_GetError());
+        return (1);
     }
 
-    return (0);
+    SDL_Window *window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED,
+                                           SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
+                                           SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    if (!window) {
+        fprintf(stderr, "Failed to create SDL window: %s", SDL_GetError());
+        SDL_Quit();
+        return (1);
+    }
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        fprintf(stderr, "Failed to create SDL_Renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return (1);
+    }
+
+    int gameLoop = 1;
+    int board[ROWS][COLUMNS];
+    Tetrimino currentTetrimino;
+    init_board(board, &currentTetrimino);
+
+    SDL_Event e;
+    Uint32 fallEvent = SDL_RegisterEvents(1);
+
+    if (fallEvent != ((Uint32)-1)) {
+        SDL_AddTimer(1000, triggerFall, &fallEvent);
+    }
+
+    while (gameLoop) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) gameLoop = 0;
+            else if (e.type == fallEvent) moveTetrimino(board, 0, &currentTetrimino);
+            else if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_LEFT:
+                        moveTetrimino(board, -1, &currentTetrimino);
+                        break;
+                    case SDLK_RIGHT:
+                        moveTetrimino(board, 1, &currentTetrimino);
+                        break;
+                    case SDLK_DOWN:
+                        moveTetrimino(board, 0, &currentTetrimino);
+                        break;
+                    case SDLK_UP:
+                        rotateTetrimino(board, &currentTetrimino);
+                        break;
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        draw_board(renderer, board);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(100);
+    }
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }
