@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "main.h"
 #include "board.h"
 #include "tetris.h"
@@ -20,7 +21,7 @@ void initGame(SDL_Renderer *renderer, GameState *state) {
     state->linesCleared = 0;
     state->level = 0;
     spawnTetrimino(state);
-    draw_board(renderer, state->board, &state->currentTetrimino);
+    draw_board(renderer, state);
 }
     
 
@@ -42,6 +43,23 @@ int main(void) {
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
         fprintf(stderr, "Failed to create SDL_Renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return (1);
+    }
+
+    if (TTF_Init() != 0) {
+        fprintf(stderr, "Failed to initialize SDL_TTF: %s\n", TTF_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return (1);
+    }
+    TTF_Font *font = TTF_OpenFont("assets/default.ttf", 24);
+    if (!font) {
+        fprintf(stderr, "Failed to load font: %s\n", TTF_GetError());
+        TTF_Quit();
+        SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
         return (1);
@@ -87,12 +105,14 @@ int main(void) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        draw_board(renderer, gameState.board, &gameState.currentTetrimino);
+        draw_board(renderer, &gameState);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }
 
+    TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
 }

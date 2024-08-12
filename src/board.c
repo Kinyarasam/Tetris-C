@@ -1,7 +1,7 @@
 #include "tetris.h"
 
 void gameOver(GameState *state) {
-    Tetrimino *tetrimino = &state->currentTetrimino;
+    // Tetrimino *tetrimino = &state->currentTetrimino;
     printf("Game Over! Press R to restart or Q to quit.\n");
 
     memset(state->board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
@@ -36,14 +36,14 @@ void gameOver(GameState *state) {
 //     initTetrimino(tetrimino, board);
 // }
 
-void draw_board(SDL_Renderer *renderer, Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+void draw_board(SDL_Renderer *renderer, GameState *state) {
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLUMNS; j++) {
             SDL_Rect cell = { j * CELL_SIZE, i * CELL_SIZE,
                               CELL_SIZE, CELL_SIZE };
 
-            SDL_Color color = board[i][j].color;
-            if (board[i][j].filled == FILLED) {
+            SDL_Color color = state->board[i][j].color;
+            if (state->board[i][j].filled == FILLED) {
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
                 SDL_RenderFillRect(renderer, &cell);
             } else {

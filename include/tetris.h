@@ -12,5 +12,6 @@ void initTetrimino(GameState *state);
 void moveTetrimino(GameState *state, int direction);
 void rotateTetrimino(GameState *state);
 void spawnTetrimino(GameState *state);
+void clearLines(GameState *state);
 
 #endif /** __TETRIS_H__ */

@@ -11,7 +11,7 @@ bool checkCollision(GameState *state, int newRow, int newCol) {
                 int targetRow = newRow + i;
                 int targetCol = newCol + j;
 
-                printf("Checking position [%d, %d] on board\n", targetRow, targetCol);
+                // printf("Checking position [%d, %d] on board\n", targetRow, targetCol);
 
                 if (targetRow >= ROWS || targetRow < 0 || targetCol >= COLUMNS || targetCol < 0) {
                     return true;
@@ -26,12 +26,12 @@ bool checkCollision(GameState *state, int newRow, int newCol) {
     return false;
 }
 
-int clearLines(Cell board[ROWS][COLUMNS]) {
+void clearLines(GameState *state) {
     int linesCleared = 0;
     for (int i = ROWS - 1; i >= 0; i--) {
         bool lineisFull = true;
         for (int j = 0; j < COLUMNS; j++) {
-            if (board[i][j].filled == EMPTY) {
+            if (state->board[i][j].filled == EMPTY) {
                 lineisFull = false;
                 break;
             }
@@ -39,18 +39,19 @@ int clearLines(Cell board[ROWS][COLUMNS]) {
         if (lineisFull) {
             linesCleared++;
             for (int k = i; k > 0; k--) {
-                memcpy(board[k], board[k - 1], sizeof(board[0]));
+                memcpy(state->board[k], state->board[k - 1], sizeof(state->board[0]));
             }
-            memset(board[0], EMPTY, sizeof(board[0]));
+            memset(state->board[0], EMPTY, sizeof(state->board[0]));
             i++;
         }
     }
-    return linesCleared;
+    updateScoreAndLevel(state, linesCleared);
+    printf("%d\n", state->score);
 }
 
 void spawnTetrimino(GameState *state) {
     Tetrimino *tetrimino = &state->currentTetrimino;
-    clearLines(state->board);
+    clearLines(state);
     int shapeType = rand() % NUMBER_OF_SHAPES;
     switch (shapeType) {
         case 0:
@@ -78,7 +79,7 @@ void spawnTetrimino(GameState *state) {
     tetrimino->color = colors[shapeType];
     tetrimino->row = 0;
     tetrimino->col = (COLUMNS / 2) - (TETRIMINO_SIZE / 2);
-    printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
+    // printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
     if (!checkCollision(state, tetrimino->row, tetrimino->col)) {
         update_board(state, FILLED);
     } else {
@@ -131,7 +132,7 @@ void rotateTetrimino(GameState *state) {
 
     rotateClockwise(tetrimino->shape);
 
-    printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
+    // printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
     if (checkCollision(state, tetrimino->row, tetrimino->col)) {
         memcpy(tetrimino->shape, originalShape, sizeof(tetrimino->shape));
     }
