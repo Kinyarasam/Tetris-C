@@ -3,10 +3,9 @@
 
 #include "tetris.h"
 
-
-void init_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino);
+// void init_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino);
 void draw_board(SDL_Renderer *renderer, Cell board[ROWS][COLUMNS], Tetrimino *tetrimino);
-void update_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino, int value);
-void gameOver(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino);
+void update_board(GameState *state, int value);
+void gameOver(GameState *state);
 
 #endif /** __BOARD_H__ */

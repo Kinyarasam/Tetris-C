@@ -3,6 +3,7 @@
 #include "main.h"
 #include "board.h"
 #include "tetris.h"
+#include "score.h"
 
 Uint32 triggerFall(Uint32 interval, void *param) {
     SDL_Event event;
@@ -13,10 +14,13 @@ Uint32 triggerFall(Uint32 interval, void *param) {
     return interval;
 }
 
-void initGame(SDL_Renderer *renderer, Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
-    memset(board, EMPTY, sizeof(int) * ROWS * COLUMNS);
-    spawnTetrimino(tetrimino, board);
-    draw_board(renderer, board, tetrimino);
+void initGame(SDL_Renderer *renderer, GameState *state) {
+    memset(state->board, EMPTY, sizeof(state->board));
+    state->score = 0;
+    state->linesCleared = 0;
+    state->level = 0;
+    spawnTetrimino(state);
+    draw_board(renderer, state->board, &state->currentTetrimino);
 }
     
 
@@ -43,12 +47,11 @@ int main(void) {
         return (1);
     }
 
-    Tetrimino currentTetrimino;
-    initGame(renderer, board, &currentTetrimino);
+    GameState gameState;
+    initGame(renderer, &gameState);
 
     SDL_Event e;
     Uint32 fallEvent = SDL_RegisterEvents(1);
-
     if (fallEvent != ((Uint32)-1)) {
         SDL_AddTimer(1000, triggerFall, &fallEvent);
     }
@@ -57,23 +60,23 @@ int main(void) {
     while (gameLoop) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) gameLoop = 0;
-            else if (e.type == fallEvent) moveTetrimino(board, 0, &currentTetrimino);
+            else if (e.type == fallEvent) moveTetrimino(&gameState, 0);
             else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                     case SDLK_LEFT:
-                        moveTetrimino(board, -1, &currentTetrimino);
+                        moveTetrimino(&gameState, -1);
                         break;
                     case SDLK_RIGHT:
-                        moveTetrimino(board, 1, &currentTetrimino);
+                        moveTetrimino(&gameState, 1);
                         break;
                     case SDLK_DOWN:
-                        moveTetrimino(board, 0, &currentTetrimino);
+                        moveTetrimino(&gameState, 0);
                         break;
                     case SDLK_UP:
-                        rotateTetrimino(board, &currentTetrimino);
+                        rotateTetrimino(&gameState);
                         break;
                     case SDLK_r:
-                        initGame(renderer, board, &currentTetrimino);
+                        initGame(renderer, &gameState);
                         break;
                     case SDLK_q:
                         gameLoop = 0;
@@ -84,7 +87,7 @@ int main(void) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        draw_board(renderer, board, &currentTetrimino);
+        draw_board(renderer, gameState.board, &gameState.currentTetrimino);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }

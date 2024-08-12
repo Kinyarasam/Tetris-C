@@ -3,7 +3,8 @@
 #include "shapes.h"
 #include <stdbool.h>
 
-bool checkCollision(Cell board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino *tetrimino) {
+bool checkCollision(GameState *state, int newRow, int newCol) {
+    Tetrimino *tetrimino = &state->currentTetrimino;
     for (int i = 0; i < TETRIMINO_SIZE; i++) {
         for (int j = 0; j < TETRIMINO_SIZE; j++) {
             if (tetrimino->shape[i][j] == 1) {
@@ -16,7 +17,7 @@ bool checkCollision(Cell board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino
                     return true;
                 }
 
-                if (board[targetRow][targetCol].filled == FILLED) {
+                if (state->board[targetRow][targetCol].filled == FILLED) {
                     return true;
                 }
             }
@@ -25,8 +26,8 @@ bool checkCollision(Cell board[ROWS][COLUMNS], int newRow, int newCol, Tetrimino
     return false;
 }
 
-
-void clearLines(Cell board[ROWS][COLUMNS]) {
+int clearLines(Cell board[ROWS][COLUMNS]) {
+    int linesCleared = 0;
     for (int i = ROWS - 1; i >= 0; i--) {
         bool lineisFull = true;
         for (int j = 0; j < COLUMNS; j++) {
@@ -36,6 +37,7 @@ void clearLines(Cell board[ROWS][COLUMNS]) {
             }
         }
         if (lineisFull) {
+            linesCleared++;
             for (int k = i; k > 0; k--) {
                 memcpy(board[k], board[k - 1], sizeof(board[0]));
             }
@@ -43,10 +45,12 @@ void clearLines(Cell board[ROWS][COLUMNS]) {
             i++;
         }
     }
+    return linesCleared;
 }
 
-void spawnTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]) {
-    clearLines(board);
+void spawnTetrimino(GameState *state) {
+    Tetrimino *tetrimino = &state->currentTetrimino;
+    clearLines(state->board);
     int shapeType = rand() % NUMBER_OF_SHAPES;
     switch (shapeType) {
         case 0:
@@ -74,30 +78,30 @@ void spawnTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]) {
     tetrimino->color = colors[shapeType];
     tetrimino->row = 0;
     tetrimino->col = (COLUMNS / 2) - (TETRIMINO_SIZE / 2);
-    printf("%d\n", checkCollision(board, tetrimino->row, tetrimino->col, tetrimino));
-    if (!checkCollision(board, tetrimino->row, tetrimino->col, tetrimino)) {
-        update_board(board, tetrimino, FILLED);
+    printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
+    if (!checkCollision(state, tetrimino->row, tetrimino->col)) {
+        update_board(state, FILLED);
     } else {
-        printf("gameOver");
-        gameOver(board, tetrimino);
+        gameOver(state);
     }
 }
 
-void moveTetrimino(Cell board[ROWS][COLUMNS], int direction, Tetrimino *tetrimino) {
+void moveTetrimino(GameState *state, int direction) {
+    Tetrimino *tetrimino = &state->currentTetrimino;
     int newRow = tetrimino->row + (direction == 0 ? 1 : 0);
     int newCol = tetrimino->col + (direction == -1 ? -1 : (direction == 1 ? 1 : 0));
 
-    update_board(board, tetrimino, EMPTY);
+    update_board(state, EMPTY);
 
-    if (!checkCollision(board, newRow, newCol, tetrimino)) {
+    if (!checkCollision(state, newRow, newCol)) {
         tetrimino->row = newRow;
         tetrimino->col = newCol;
 
-        update_board(board, tetrimino, FILLED);
+        update_board(state, FILLED);
     } else {
         if (direction == 0) {
-            update_board(board, tetrimino, FILLED);
-            spawnTetrimino(tetrimino, board);
+            update_board(state, FILLED);
+            spawnTetrimino(state);
         }
     }
 }
@@ -118,21 +122,22 @@ void rotateClockwise(int shape[TETRIMINO_SIZE][TETRIMINO_SIZE]) {
     }
 }
 
-void rotateTetrimino(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+void rotateTetrimino(GameState *state) {
+    Tetrimino *tetrimino = &state->currentTetrimino;
     int originalShape[TETRIMINO_SIZE][TETRIMINO_SIZE];
     memcpy(originalShape, tetrimino->shape, sizeof(tetrimino->shape));
 
-    update_board(board, tetrimino, EMPTY);
+    update_board(state, EMPTY);
 
     rotateClockwise(tetrimino->shape);
 
-    printf("%d\n", checkCollision(board, tetrimino->row, tetrimino->col, tetrimino));
-    if (checkCollision(board, tetrimino->row, tetrimino->col, tetrimino)) {
+    printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
+    if (checkCollision(state, tetrimino->row, tetrimino->col)) {
         memcpy(tetrimino->shape, originalShape, sizeof(tetrimino->shape));
     }
-    update_board(board, tetrimino, FILLED);
+    update_board(state, FILLED);
 }
 
-void initTetrimino(Tetrimino *tetrimino, Cell board[ROWS][COLUMNS]) {
-    spawnTetrimino(tetrimino, board);
+void initTetrimino(GameState *state) {
+    spawnTetrimino(state);
 }

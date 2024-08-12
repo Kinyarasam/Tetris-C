@@ -1,9 +1,10 @@
 #include "tetris.h"
 
-void gameOver(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+void gameOver(GameState *state) {
+    Tetrimino *tetrimino = &state->currentTetrimino;
     printf("Game Over! Press R to restart or Q to quit.\n");
 
-    memset(board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
+    memset(state->board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
 
     bool waitingForInput = true;
     SDL_Event e;
@@ -12,8 +13,8 @@ void gameOver(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
             if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                     case SDLK_r:
-                        memset(board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
-                        spawnTetrimino(tetrimino, board);
+                        memset(state->board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
+                        spawnTetrimino(state);
                         waitingForInput = false;
                         break;
                     case SDLK_q:
@@ -25,15 +26,15 @@ void gameOver(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
     }
 }
 
-void init_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLUMNS; j++) {
-            board[i][j].filled = EMPTY;
-            board[i][j].color = (SDL_Color){255, 255, 255, 255};
-        }
-    }
-    initTetrimino(tetrimino, board);
-}
+// void init_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
+//     for (int i = 0; i < ROWS; i++) {
+//         for (int j = 0; j < COLUMNS; j++) {
+//             board[i][j].filled = EMPTY;
+//             board[i][j].color = (SDL_Color){255, 255, 255, 255};
+//         }
+//     }
+//     initTetrimino(tetrimino, board);
+// }
 
 void draw_board(SDL_Renderer *renderer, Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
     for (int i = 0; i < ROWS; i++) {
@@ -53,7 +54,8 @@ void draw_board(SDL_Renderer *renderer, Cell board[ROWS][COLUMNS], Tetrimino *te
     }
 }
 
-void update_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino, int value) {
+void update_board(GameState *state, int value) {
+    Tetrimino *tetrimino = &state->currentTetrimino;
     for (int i = 0; i < TETRIMINO_SIZE; i++) {
         for (int j = 0; j < TETRIMINO_SIZE; j++) {
             if (tetrimino->shape[i][j] == 1) {
@@ -61,9 +63,9 @@ void update_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino, int value) {
                 int targetCol = tetrimino->col + j;
 
                 if (targetRow >= 0 && targetRow < ROWS && targetCol >= 0 && targetCol < COLUMNS) {
-                    board[targetRow][targetCol].filled = value;
+                    state->board[targetRow][targetCol].filled = value;
                     if (value == FILLED) {
-                        board[targetRow][targetCol].color = tetrimino->color;
+                        state->board[targetRow][targetCol].color = tetrimino->color;
                     }
                 }
             }
