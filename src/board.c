@@ -1,8 +1,43 @@
 #include "tetris.h"
+#include "main.h"
 
 void gameOver(GameState *state) {
-    // Tetrimino *tetrimino = &state->currentTetrimino;
-    printf("Game Over! Press R to restart or Q to quit.\n");
+    const char *message = "Game Over! Press R to restart or Q to quit.";
+
+    SDL_Color textColor = {255, 0, 0, 255};
+    SDL_Color backgroundColor = {0, 0, 0, 128};
+
+    SDL_Surface* surface = TTF_RenderText_Solid(state->font, message, textColor);
+    if (!surface) {
+        fprintf(stderr, "Unable to create text surface for game over message: %s\n", TTF_GetError());
+        return;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(state->renderer, surface);
+    if (!texture) {
+        fprintf(stderr, "Unable to create texture from surface: %s\n", SDL_GetError());
+        SDL_FreeSurface(surface);
+        return;
+    }
+
+    int padding = 10;
+    SDL_Rect textRect = {
+        (SCREEN_WIDTH - surface->w) / 2 - padding, 
+        (SCREEN_HEIGHT - surface->h) / 2 - padding, 
+        surface->w + 2 * padding, 
+        surface->h + 2 * padding
+    };
+    SDL_SetRenderDrawColor(state->renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+    SDL_RenderFillRect(state->renderer, &textRect);
+
+    // SDL_Rect textRect = { (SCREEN_WIDTH - surface->w) / 2, (SCREEN_HEIGHT - surface->h) / 2, surface->w, surface->h };
+    textRect.x += padding;
+    textRect.y += padding;
+    SDL_RenderCopy(state->renderer, texture, NULL, &textRect);
+    SDL_RenderPresent(state->renderer);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
 
     memset(state->board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
 
@@ -13,7 +48,6 @@ void gameOver(GameState *state) {
             if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                     case SDLK_r:
-                        memset(state->board, EMPTY, sizeof(Cell) * ROWS * COLUMNS);
                         spawnTetrimino(state);
                         waitingForInput = false;
                         break;

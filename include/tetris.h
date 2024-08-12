@@ -2,6 +2,7 @@
 #define __TETRIS_H__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include "score.h"
 #include "constants.h"

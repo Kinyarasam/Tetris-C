@@ -3,6 +3,7 @@
 
 #include "constants.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 typedef struct {
     int filled;
@@ -22,6 +23,8 @@ typedef struct {
     int score;
     int linesCleared;
     int level;
+    TTF_Font *font;
+    SDL_Renderer *renderer;
 } GameState;
 
 #define SINGLE_LINE_SCORE 100
@@ -31,6 +34,5 @@ typedef struct {
 
 void updateScoreAndLevel(GameState *state, int linesCleared);
 void resetScoreAndLevel(GameState *state);
-void renderScore(SDL_Renderer *renderer, GameState *state);
 
 #endif /** __SCORE_H__ */

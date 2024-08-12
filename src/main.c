@@ -5,6 +5,7 @@
 #include "board.h"
 #include "tetris.h"
 #include "score.h"
+#include "utilities.h"
 
 Uint32 triggerFall(Uint32 interval, void *param) {
     SDL_Event event;
@@ -15,8 +16,10 @@ Uint32 triggerFall(Uint32 interval, void *param) {
     return interval;
 }
 
-void initGame(SDL_Renderer *renderer, GameState *state) {
+void initGame(SDL_Renderer *renderer, TTF_Font *font, GameState *state) {
     memset(state->board, EMPTY, sizeof(state->board));
+    state->font = font;
+    state->renderer = renderer;
     state->score = 0;
     state->linesCleared = 0;
     state->level = 0;
@@ -55,6 +58,7 @@ int main(void) {
         SDL_Quit();
         return (1);
     }
+
     TTF_Font *font = TTF_OpenFont("assets/default.ttf", 24);
     if (!font) {
         fprintf(stderr, "Failed to load font: %s\n", TTF_GetError());
@@ -65,8 +69,32 @@ int main(void) {
         return (1);
     }
 
+    SDL_Color textColor = {255, 255, 255, 255};
+    SDL_Surface *surface = TTF_RenderText_Solid(font, "Hello, Tetris!", textColor);
+    if (!surface) {
+        printf("Failed to create text surface: %s\n", TTF_GetError());
+        TTF_CloseFont(font);
+        TTF_Quit();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return (1);
+    }
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (!texture) {
+        printf("Failed to create texture from surface: %s\n", SDL_GetError());
+        SDL_FreeSurface(surface);
+        TTF_CloseFont(font);
+        TTF_Quit();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return (1);
+    }
+
     GameState gameState;
-    initGame(renderer, &gameState);
+    initGame(renderer, font, &gameState);
 
     SDL_Event e;
     Uint32 fallEvent = SDL_RegisterEvents(1);
@@ -94,7 +122,7 @@ int main(void) {
                         rotateTetrimino(&gameState);
                         break;
                     case SDLK_r:
-                        initGame(renderer, &gameState);
+                        initGame(renderer, font, &gameState);
                         break;
                     case SDLK_q:
                         gameLoop = 0;
@@ -105,11 +133,20 @@ int main(void) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+
         draw_board(renderer, &gameState);
+
+        char scoreText[50];
+        sprintf(scoreText, "Score: %d", gameState.score);
+        int scoreX = SCREEN_WIDTH - 200;
+        renderText(renderer, font, scoreText, textColor, scoreX, 10);
+
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }
 
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

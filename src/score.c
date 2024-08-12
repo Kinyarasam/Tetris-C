@@ -27,9 +27,3 @@ void resetScoreAndLevel(GameState *state) {
     state->linesCleared = 0;
 }
 
-void renderScore(SDL_Renderer *renderer, GameState *state) {
-    char scoreText[50];
-    sprintf(scoreText, "Score: %d\n", state->score);
-    printf("%s\n", scoreText);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-}

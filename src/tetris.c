@@ -46,7 +46,6 @@ void clearLines(GameState *state) {
         }
     }
     updateScoreAndLevel(state, linesCleared);
-    printf("%d\n", state->score);
 }
 
 void spawnTetrimino(GameState *state) {
