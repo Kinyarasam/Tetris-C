@@ -7,5 +7,6 @@
 void draw_board(SDL_Renderer *renderer, GameState *state);
 void update_board(GameState *state, int value);
 void gameOver(GameState *state);
+void drawNextTetriminoPreview(GameState *state);
 
 #endif /** __BOARD_H__ */

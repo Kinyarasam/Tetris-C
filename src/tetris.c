@@ -48,38 +48,41 @@ void clearLines(GameState *state) {
     updateScoreAndLevel(state, linesCleared);
 }
 
-void spawnTetrimino(GameState *state) {
-    Tetrimino *tetrimino = &state->currentTetrimino;
-    clearLines(state);
-    int shapeType = rand() % NUMBER_OF_SHAPES;
+const int (*getShape(int shapeType))[TETRIMINO_SIZE] {
     switch (shapeType) {
         case 0:
-            memcpy(tetrimino->shape, tetriminoI, sizeof(tetriminoI));
-            break;
+            return tetriminoI;
         case 1:
-            memcpy(tetrimino->shape, tetriminoO, sizeof(tetriminoO));
-            break;
+            return tetriminoO;
         case 2:
-            memcpy(tetrimino->shape, tetriminoT, sizeof(tetriminoT));
-            break;
+            return tetriminoT;
         case 3:
-            memcpy(tetrimino->shape, tetriminoS, sizeof(tetriminoS));
-            break;
+            return tetriminoS;
         case 4:
-            memcpy(tetrimino->shape, tetriminoZ, sizeof(tetriminoZ));
-            break;
+            return tetriminoZ;
         case 5:
-            memcpy(tetrimino->shape, tetriminoJ, sizeof(tetriminoJ));
-            break;
+            return tetriminoJ;
         case 6:
-            memcpy(tetrimino->shape, tetriminoL, sizeof(tetriminoL));
-            break;
+            return tetriminoL;
+        default:
+            return NULL; // Handle invalid shape types
     }
-    tetrimino->color = colors[shapeType];
-    tetrimino->row = 0;
-    tetrimino->col = (COLUMNS / 2) - (TETRIMINO_SIZE / 2);
+}
+
+void spawnTetrimino(GameState *state) {
+    state->currentTetrimino = state->nextTetrimino;
+
+    clearLines(state);
+
+    int shapeType = rand() % NUMBER_OF_SHAPES;
+    
+    const int (*newShape)[TETRIMINO_SIZE] = getShape(shapeType);
+    memcpy(state->nextTetrimino.shape, newShape, sizeof(state->nextTetrimino.shape));
+    state->nextTetrimino.color = colors[shapeType];
+    state->nextTetrimino.row = 0;
+    state->nextTetrimino.col = (COLUMNS / 2) - (TETRIMINO_SIZE / 2);
     // printf("%d\n", checkCollision(state, tetrimino->row, tetrimino->col));
-    if (!checkCollision(state, tetrimino->row, tetrimino->col)) {
+    if (!checkCollision(state, state->nextTetrimino.row, state->nextTetrimino.col)) {
         update_board(state, FILLED);
     } else {
         gameOver(state);

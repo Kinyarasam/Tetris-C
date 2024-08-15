@@ -20,19 +20,15 @@ void gameOver(GameState *state) {
         return;
     }
 
-    int padding = 10;
     SDL_Rect textRect = {
-        (SCREEN_WIDTH - surface->w) / 2 - padding, 
-        (SCREEN_HEIGHT - surface->h) / 2 - padding, 
-        surface->w + 2 * padding, 
-        surface->h + 2 * padding
+        (SCREEN_WIDTH - surface->w) / 2,
+        (SCREEN_HEIGHT - surface->h) / 2,
+        surface->w + 2,
+        surface->h + 2,
     };
     SDL_SetRenderDrawColor(state->renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     SDL_RenderFillRect(state->renderer, &textRect);
 
-    // SDL_Rect textRect = { (SCREEN_WIDTH - surface->w) / 2, (SCREEN_HEIGHT - surface->h) / 2, surface->w, surface->h };
-    textRect.x += padding;
-    textRect.y += padding;
     SDL_RenderCopy(state->renderer, texture, NULL, &textRect);
     SDL_RenderPresent(state->renderer);
 
@@ -59,16 +55,6 @@ void gameOver(GameState *state) {
         }
     }
 }
-
-// void init_board(Cell board[ROWS][COLUMNS], Tetrimino *tetrimino) {
-//     for (int i = 0; i < ROWS; i++) {
-//         for (int j = 0; j < COLUMNS; j++) {
-//             board[i][j].filled = EMPTY;
-//             board[i][j].color = (SDL_Color){255, 255, 255, 255};
-//         }
-//     }
-//     initTetrimino(tetrimino, board);
-// }
 
 void draw_board(SDL_Renderer *renderer, GameState *state) {
     for (int i = 0; i < ROWS; i++) {
@@ -105,4 +91,45 @@ void update_board(GameState *state, int value) {
             }
         }
     }
+}
+
+void drawNextTetriminoPreview(GameState *state) {
+    int previewWidth = 120;
+    int previewHeight = 120;
+    int previewX = SCREEN_WIDTH - (SCREEN_WIDTH / 4) - (previewWidth / 4);
+    int previewY = SCREEN_HEIGHT / 4;
+
+    SDL_Rect previewRect = {previewX, previewY, previewWidth, previewHeight};
+
+    SDL_Color textColor = {255, 255, 255, 255};
+    SDL_Surface* textSurface = TTF_RenderText_Solid(state->font, "Next Tetrimino", textColor);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(state->renderer, textSurface);
+
+    SDL_Rect textRect;
+    textRect.x = previewRect.x + (previewRect.w - textSurface->w) / 2;
+    textRect.y = previewRect.y - textSurface->h - 10;
+    textRect.w = textSurface->w;
+    textRect.h = textSurface->h;
+
+    SDL_RenderCopy(state->renderer, textTexture, NULL, &textRect);
+
+    SDL_SetRenderDrawColor(state->renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(state->renderer, &previewRect);
+
+    int previewBlockSize = 20;
+    int blockStartX = previewRect.x + (previewWidth - (TETRIMINO_SIZE * previewBlockSize) / 2);
+    int blockStartY = previewRect.y + (previewHeight - (TETRIMINO_SIZE * previewBlockSize) / 2);
+
+    for (int i = 0; i < TETRIMINO_SIZE; i++) {
+        for (int j = 0; j < TETRIMINO_SIZE; j++) {
+            if (state->nextTetrimino.shape[i][j] == FILLED) {
+                SDL_Rect blockRect = {blockStartX + j * previewBlockSize, blockStartY + i * previewBlockSize, previewBlockSize, previewBlockSize};
+                SDL_SetRenderDrawColor(state->renderer, state->nextTetrimino.color.r, state->nextTetrimino.color.g, state->nextTetrimino.color.b, 255);
+                SDL_RenderFillRect(state->renderer, &blockRect);
+            }
+        }
+    }
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
 }

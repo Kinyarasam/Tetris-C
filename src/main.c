@@ -135,6 +135,7 @@ int main(void) {
         SDL_RenderClear(renderer);
 
         draw_board(renderer, &gameState);
+        drawNextTetriminoPreview(&gameState);
 
         char scoreText[50];
         sprintf(scoreText, "Score: %d", gameState.score);

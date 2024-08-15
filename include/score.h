@@ -20,6 +20,7 @@ typedef struct {
 typedef struct {
     Cell board[ROWS][COLUMNS];
     Tetrimino currentTetrimino;
+    Tetrimino nextTetrimino;
     int score;
     int linesCleared;
     int level;
